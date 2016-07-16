@@ -34,7 +34,7 @@ if (!HAS_ON_AFTER_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
 if (!HAS_ON_BEFORE_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
   PRINT_MEDIA_QUERY_LIST.addListener((mqlEvent) => {
     if (mqlEvent.matches) {
-      window.dispatchEvent(createNewEvent('beforerprint'));
+      window.dispatchEvent(createNewEvent('beforeprint'));
     }
   });
 }
