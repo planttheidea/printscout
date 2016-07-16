@@ -1,16 +1,16 @@
 import test from 'tape';
 
 import {
-  addEvent,
+  createNewEvent,
   findAndRemoveHandler,
   throwInvalidMethodError,
   throwNotSupportedError
 } from '../src/utils';
 
-test('addEvent creates a new event', (t) => {
+test('createNewEvent creates a new event', (t) => {
   t.plan(2);
 
-  const event = addEvent('test');
+  const event = createNewEvent('test');
 
   t.is(event.constructor, window.Event);
   t.false(event.isTrusted);

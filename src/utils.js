@@ -11,7 +11,7 @@ const PRINT_MEDIA_QUERY_LIST = HAS_MATCH_MEDIA_SUPPORT ? window.matchMedia('prin
  * @param {string} eventName
  * @return {Event}
  */
-const addEvent = (eventName) => {
+const createNewEvent = (eventName) => {
   try {
     return new Event(eventName);
   } catch (exception) {
@@ -23,13 +23,10 @@ const addEvent = (eventName) => {
   }
 };
 
-const AFTER_PRINT_EVENT = addEvent('afterprint');
-const BEFORE_PRINT_EVENT = addEvent('beforerprint');
-
 if (!HAS_ON_AFTER_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
   PRINT_MEDIA_QUERY_LIST.addListener((mqlEvent) => {
     if (!mqlEvent.matches) {
-      window.dispatchEvent(AFTER_PRINT_EVENT);
+      window.dispatchEvent(createNewEvent('afterprint'));
     }
   });
 }
@@ -37,7 +34,7 @@ if (!HAS_ON_AFTER_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
 if (!HAS_ON_BEFORE_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
   PRINT_MEDIA_QUERY_LIST.addListener((mqlEvent) => {
     if (mqlEvent.matches) {
-      window.dispatchEvent(BEFORE_PRINT_EVENT);
+      window.dispatchEvent(createNewEvent('beforerprint'));
     }
   });
 }
@@ -88,7 +85,7 @@ export {HAS_MATCH_MEDIA_SUPPORT};
 export {HAS_ON_AFTER_PRINT};
 export {HAS_ON_BEFORE_PRINT};
 
-export {addEvent};
+export {createNewEvent};
 export {findAndRemoveHandler};
 export {throwInvalidMethodError};
 export {throwNotSupportedError};
