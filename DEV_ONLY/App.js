@@ -37,9 +37,9 @@ printScout.removeListener('before', beforeListenerOne);
 
 console.log(printScout);
 
-printScout.removeListener();
-
-console.log(printScout);
+// printScout.removeListener();
+//
+// console.log(printScout);
 
 const App = () => {
   return (
