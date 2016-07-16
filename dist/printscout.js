@@ -225,7 +225,7 @@ var PrintScout =
 	 * @param {string} eventName
 	 * @return {Event}
 	 */
-	var addEvent = function addEvent(eventName) {
+	var createNewEvent = function createNewEvent(eventName) {
 	  try {
 	    return new Event(eventName);
 	  } catch (exception) {
@@ -237,13 +237,10 @@ var PrintScout =
 	  }
 	};
 	
-	var AFTER_PRINT_EVENT = addEvent('afterprint');
-	var BEFORE_PRINT_EVENT = addEvent('beforerprint');
-	
 	if (!HAS_ON_AFTER_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
 	  PRINT_MEDIA_QUERY_LIST.addListener(function (mqlEvent) {
 	    if (!mqlEvent.matches) {
-	      window.dispatchEvent(AFTER_PRINT_EVENT);
+	      window.dispatchEvent(createNewEvent('afterprint'));
 	    }
 	  });
 	}
@@ -251,7 +248,7 @@ var PrintScout =
 	if (!HAS_ON_BEFORE_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
 	  PRINT_MEDIA_QUERY_LIST.addListener(function (mqlEvent) {
 	    if (mqlEvent.matches) {
-	      window.dispatchEvent(BEFORE_PRINT_EVENT);
+	      window.dispatchEvent(createNewEvent('beforeprint'));
 	    }
 	  });
 	}
@@ -301,7 +298,7 @@ var PrintScout =
 	exports.HAS_MATCH_MEDIA_SUPPORT = HAS_MATCH_MEDIA_SUPPORT;
 	exports.HAS_ON_AFTER_PRINT = HAS_ON_AFTER_PRINT;
 	exports.HAS_ON_BEFORE_PRINT = HAS_ON_BEFORE_PRINT;
-	exports.addEvent = addEvent;
+	exports.createNewEvent = createNewEvent;
 	exports.findAndRemoveHandler = findAndRemoveHandler;
 	exports.throwInvalidMethodError = throwInvalidMethodError;
 	exports.throwNotSupportedError = throwNotSupportedError;
