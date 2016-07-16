@@ -59,6 +59,7 @@ Removes the `handler` from the list of handlers that will fire when the specific
 * IE11
 * Edge
 * Safari
+
 That said, because internally `PrintScout` leverages the `onbeforeprint` and `onafterprint` functions that are available in IE5.5+, browser support should extend all the way back to IE9 without issue, and even farther back if you provide an ES5 shim.
 
 #### Gotchas
