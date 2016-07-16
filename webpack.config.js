@@ -54,7 +54,7 @@ module.exports = {
 
     output: {
         filename: 'printscout.js',
-        library: 'printscout',
+        library: 'PrintScout',
         path: path.resolve(__dirname, 'dist'),
         umdNamedDefine: true
     },
