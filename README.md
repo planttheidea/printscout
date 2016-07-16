@@ -40,7 +40,7 @@ scout.removeListener('after', afterPrintHandler);
 scout.removeListener('before', beforePrintHandler);
 ```
 
-#### Full API description
+#### API description
 
 **scout.addListener(method: string, handler: function)** *returns handler*
 
