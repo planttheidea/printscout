@@ -30,25 +30,42 @@ const beforePrintHandler = () => {
 
 scout.addListener('before', beforePrintHandler);
 
-// or you can do it dynamically, the handler you passed is returned when added
-const afterPrintHandler = scout.addListener('after', () => {
+// or you can do it dynamically, the handler you passed is returned when added,
+// either with the shorthand methods or the standard ones
+const afterPrintHandler = scout.after(() => {
   console.log('I fire after print render');
 });
 
 // and remove them as you would any other listener
-scout.removeListener('after', afterPrintHandler);
 scout.removeListener('before', beforePrintHandler);
+
+// or with the convenience function attached to the handler passed
+afterPrintHandler.remove();
 ```
 
 #### API description
 
-**scout.addListener(method: string, handler: function)** *returns handler*
+**scout.addListener(eventName: string, handler: function)** *returns handler*
 
-Adds the `handler` to the list of handlers that will fire when the specific `method` is called. The two valid `method` values are `before` (before print) and `after` (after print).
+Adds the `handler` to the list of handlers that will fire when the specific `eventName` is called. The valid `eventName` values are `beforeprint`, `before` (shorthand for `beforeprint`), `afterprint`, and `after` (shorthand for `afterprint`).
 
-**scout.removeListener([method: string, handler: function])**
+Additionally, the `handler` passed receives an additional `remove` method attached to it, which will remove the listener when called directly.
 
-Removes the `handler` from the list of handlers that will fire when the specific method is called. If no `handler` is passed, then all handers for a given `method` are removed. If no `method` is passed, then all handlers are removed. The two valid `method` values are `before` (before print) and `after` (after print).
+**scout.removeListener([eventName: string, handler: function])**
+
+Removes the `handler` from the list of handlers that will fire when the specific method is called. If no `handler` is passed, then all handers for a given `method` are removed. If no `method` is passed, then all handlers are removed. The valid `method` values are the same as for *addListener*.
+
+**scout.after(handler: function)** *returns handler*
+
+Shorthand method for *scount.addListener('after', handler);*.
+
+**scout.before(handler: function)** *returns handler*
+
+Shorthand method for *scout.addListener('before', handler);*.
+
+**handler.remove()**
+
+Shorthand method for *scout.removeListener(eventName, handler)*.
 
 #### Browser support
 

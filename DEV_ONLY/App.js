@@ -13,11 +13,9 @@ const beforeListenerOne = (e) => {
 
 printScout.addListener('before', beforeListenerOne);
 
-const beforeListenerTwo = (e) => {
+const beforeListenerTwo = printScout.before((e) => {
   console.log('before two', e);
-};
-
-printScout.addListener('before', beforeListenerTwo);
+});
 
 const afterListenerOne = (e) => {
   console.log('after one', e);
@@ -29,17 +27,23 @@ const afterListenerTwo = (e) => {
   console.log('after two', e);
 };
 
-printScout.addListener('after', afterListenerTwo);
+printScout.addListener('afterprint', afterListenerTwo);
 
 console.log(printScout);
 
-printScout.removeListener('before', beforeListenerOne);
+printScout.removeListener('beforeprint', beforeListenerOne);
 
 console.log(printScout);
 
-// printScout.removeListener();
-//
-// console.log(printScout);
+afterListenerTwo.remove();
+
+console.log(printScout);
+
+console.log(printScout.afterHandlers[0] === afterListenerOne);
+
+printScout.removeListener();
+
+console.log(printScout);
 
 const App = () => {
   return (
