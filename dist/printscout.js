@@ -64,6 +64,9 @@ var PrintScout =
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
+	var AFTER_PRINT = 'afterprint';
+	var BEFORE_PRINT = 'beforeprint';
+	
 	var PrintScout = function () {
 	  function PrintScout() {
 	    _classCallCheck(this, PrintScout);
@@ -77,123 +80,174 @@ var PrintScout =
 	  }
 	
 	  /**
-	   * remove all listeners, either to the specific method if provided,
-	   * or across the board
+	   * add listener to list of a handlers and add remove function
+	   * to it
 	   *
-	   * @param {string} method
+	   * @param {string} eventName
+	   * @param {array<function>} handlers
+	   * @param {function} handler
+	   * @return {function}
 	   * @private
 	   */
 	
 	
 	  _createClass(PrintScout, [{
+	    key: '_addListener',
+	    value: function _addListener(eventName, handlers, handler) {
+	      var _this = this;
+	
+	      window.addEventListener(eventName, handler);
+	      handlers.push(handler);
+	
+	      handler.remove = function () {
+	        _this._removeListener(eventName, handler);
+	
+	        delete handler.remove;
+	      };
+	
+	      return handler;
+	    }
+	
+	    /**
+	     * remove all listeners, either to the specific eventName if provided,
+	     * or across the board
+	     *
+	     * @param {string} eventName
+	     * @private
+	     */
+	
+	  }, {
 	    key: '_removeAllListeners',
-	    value: function _removeAllListeners(method) {
+	    value: function _removeAllListeners(eventName) {
 	      var afterHandlerIndex = this.afterHandlers.length,
-	          beforeHandlerIndex = this.beforeHandlers.length,
-	          handlerToRemove = void 0;
+	          beforeHandlerIndex = this.beforeHandlers.length;
 	
-	      if (!method || method === 'after') {
+	      if (!eventName || eventName === 'after' || eventName === AFTER_PRINT) {
 	        while (afterHandlerIndex--) {
-	          handlerToRemove = this.afterHandlers[afterHandlerIndex];
-	
-	          window.removeEventListener('afterprint', handlerToRemove);
-	          (0, _utils.findAndRemoveHandler)(this.afterHandlers, handlerToRemove);
+	          this._removeListener(AFTER_PRINT, this.afterHandlers[afterHandlerIndex]);
 	        }
 	      }
 	
-	      if (!method || method === 'before') {
+	      if (!eventName || eventName === 'before' || eventName === BEFORE_PRINT) {
 	        while (beforeHandlerIndex--) {
-	          handlerToRemove = this.beforeHandlers[beforeHandlerIndex];
-	
-	          window.removeEventListener('beforeprint', handlerToRemove);
-	          (0, _utils.findAndRemoveHandler)(this.beforeHandlers, handlerToRemove);
+	          this._removeListener(BEFORE_PRINT, this.beforeHandlers[beforeHandlerIndex]);
 	        }
 	      }
 	    }
 	
 	    /**
+	     * remove a specific listener from the appropriate handlers
+	     * 
+	     * @param {string} eventName
+	     * @param {function} handler
+	     * @return {PrintScout}
+	     * @private
+	     */
+	
+	  }, {
+	    key: '_removeListener',
+	    value: function _removeListener(eventName, handler) {
+	      var handlers = eventName === AFTER_PRINT ? this.afterHandlers : this.beforeHandlers;
+	      var handlerIndex = handlers.indexOf(handler);
+	
+	      if (!!~handlerIndex) {
+	        var _handler = handlers[handlerIndex];
+	
+	        window.removeEventListener(eventName, _handler);
+	        (0, _utils.findAndRemoveHandler)(handlers, _handler);
+	      }
+	
+	      return this;
+	    }
+	
+	    /**
 	     * adds fn to the list of handlers
 	     *
-	     * @param {string} method
+	     * @param {string} eventName
 	     * @param {function} fn
 	     * @returns {function}
 	     */
 	
 	  }, {
 	    key: 'addListener',
-	    value: function addListener(method, fn) {
-	      var eventName = void 0,
-	          handlersArray = void 0;
-	
-	      switch (method) {
+	    value: function addListener(eventName, fn) {
+	      switch (eventName) {
 	        case 'after':
-	          eventName = 'afterprint';
-	          handlersArray = this.afterHandlers;
-	
-	          break;
+	        case AFTER_PRINT:
+	          return this._addListener(AFTER_PRINT, this.afterHandlers, fn);
 	
 	        case 'before':
-	          eventName = 'beforeprint';
-	          handlersArray = this.beforeHandlers;
-	
-	          break;
+	        case BEFORE_PRINT:
+	          return this._addListener(BEFORE_PRINT, this.beforeHandlers, fn);
 	
 	        default:
-	          (0, _utils.throwInvalidMethodError)(method);
+	          (0, _utils.throwInvalidMethodError)(eventName);
 	          return;
 	      }
+	    }
 	
-	      window.addEventListener(eventName, fn);
-	      handlersArray.push(fn);
+	    /**
+	     * convenience function for adding an afterprint listener
+	     *
+	     * @param {function} fn
+	     * @return {function}
+	     */
 	
-	      return fn;
+	  }, {
+	    key: 'after',
+	    value: function after(fn) {
+	      return this._addListener(AFTER_PRINT, this.afterHandlers, fn);
+	    }
+	
+	    /**
+	     * convenience function for adding a beforeprint listener
+	     * 
+	     * @param {function} fn
+	     * @return {function}
+	     */
+	
+	  }, {
+	    key: 'before',
+	    value: function before(fn) {
+	      return this._addListener(BEFORE_PRINT, this.beforeHandlers, fn);
 	    }
 	
 	    /**
 	     * removes the handler from the list of handlers for
-	     * the given method
+	     * the given eventName
 	     *
 	     * if the handler is not given, all handlers for the
-	     * given method are removed
+	     * given eventName are removed
 	     *
-	     * if the method is not given, all handlers across the
+	     * if the eventName is not given, all handlers across the
 	     * board are removed
 	     *
-	     * @param {string} method
+	     * @param {string} eventName
 	     * @param {function} handler
+	     * @returns {PrintScout}
 	     */
 	
 	  }, {
 	    key: 'removeListener',
-	    value: function removeListener(method, handler) {
-	      if (!method || !handler) {
-	        this._removeAllListeners(method);
+	    value: function removeListener(eventName, handler) {
+	      if (!eventName || !handler) {
+	        this._removeAllListeners(eventName);
 	        return;
 	      }
 	
-	      var eventName = void 0,
-	          handlersArray = void 0;
-	
-	      switch (method) {
+	      switch (eventName) {
 	        case 'after':
-	          eventName = 'afterprint';
-	          handlersArray = this.afterHandlers;
-	
-	          break;
+	        case AFTER_PRINT:
+	          return this._removeListener(AFTER_PRINT, handler);
 	
 	        case 'before':
-	          eventName = 'beforeprint';
-	          handlersArray = this.beforeHandlers;
-	
-	          break;
+	        case BEFORE_PRINT:
+	          return this._removeListener(BEFORE_PRINT, handler);
 	
 	        default:
-	          (0, _utils.throwInvalidMethodError)(method);
-	          return;
+	          (0, _utils.throwInvalidMethodError)(eventName);
+	          return this;
 	      }
-	
-	      window.removeEventListener(eventName, handler);
-	      (0, _utils.findAndRemoveHandler)(handlersArray, handler);
 	    }
 	  }]);
 	

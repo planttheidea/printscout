@@ -7,6 +7,9 @@ import {
   throwNotSupportedError
 } from './utils';
 
+const AFTER_PRINT = 'afterprint';
+const BEFORE_PRINT = 'beforeprint';
+
 class PrintScout {
   constructor() {
     this.afterHandlers = [];
@@ -18,113 +21,150 @@ class PrintScout {
   }
 
   /**
-   * remove all listeners, either to the specific method if provided,
-   * or across the board
+   * add listener to list of a handlers and add remove function
+   * to it
    *
-   * @param {string} method
+   * @param {string} eventName
+   * @param {array<function>} handlers
+   * @param {function} handler
+   * @return {function}
    * @private
    */
-  _removeAllListeners(method) {
+  _addListener(eventName, handlers, handler) {
+    window.addEventListener(eventName, handler);
+    handlers.push(handler);
+
+    handler.remove = () => {
+      this._removeListener(eventName, handler);
+
+      delete handler.remove;
+    };
+
+    return handler;
+  }
+
+  /**
+   * remove all listeners, either to the specific eventName if provided,
+   * or across the board
+   *
+   * @param {string} eventName
+   * @private
+   */
+  _removeAllListeners(eventName) {
     let afterHandlerIndex = this.afterHandlers.length,
-        beforeHandlerIndex = this.beforeHandlers.length,
-        handlerToRemove;
+        beforeHandlerIndex = this.beforeHandlers.length;
 
-    if (!method || method === 'after') {
+    if (!eventName || eventName === 'after' || eventName === AFTER_PRINT) {
       while (afterHandlerIndex--) {
-        handlerToRemove = this.afterHandlers[afterHandlerIndex];
-
-        window.removeEventListener('afterprint', handlerToRemove);
-        findAndRemoveHandler(this.afterHandlers, handlerToRemove);
+        this._removeListener(AFTER_PRINT, this.afterHandlers[afterHandlerIndex]);
       }
     }
 
-    if (!method || method === 'before') {
+    if (!eventName || eventName === 'before' || eventName === BEFORE_PRINT) {
       while (beforeHandlerIndex--) {
-        handlerToRemove = this.beforeHandlers[beforeHandlerIndex];
-
-        window.removeEventListener('beforeprint', handlerToRemove);
-        findAndRemoveHandler(this.beforeHandlers, handlerToRemove);
+        this._removeListener(BEFORE_PRINT, this.beforeHandlers[beforeHandlerIndex]);
       }
     }
+  }
+
+  /**
+   * remove a specific listener from the appropriate handlers
+   * 
+   * @param {string} eventName
+   * @param {function} handler
+   * @return {PrintScout}
+   * @private
+   */
+  _removeListener(eventName, handler) {
+    const handlers = eventName === AFTER_PRINT ? this.afterHandlers : this.beforeHandlers;
+    const handlerIndex = handlers.indexOf(handler);
+
+    if (!!~handlerIndex) {
+      const handler = handlers[handlerIndex];
+
+      window.removeEventListener(eventName, handler);
+      findAndRemoveHandler(handlers, handler);
+    }
+
+    return this;
   }
 
   /**
    * adds fn to the list of handlers
    *
-   * @param {string} method
+   * @param {string} eventName
    * @param {function} fn
    * @returns {function}
    */
-  addListener(method, fn) {
-    let eventName,
-        handlersArray;
-
-    switch (method) {
+  addListener(eventName, fn) {
+    switch (eventName) {
       case 'after':
-        eventName = 'afterprint';
-        handlersArray = this.afterHandlers;
-
-        break;
+      case AFTER_PRINT:
+        return this._addListener(AFTER_PRINT, this.afterHandlers, fn);
 
       case 'before':
-        eventName = 'beforeprint';
-        handlersArray = this.beforeHandlers;
-
-        break;
+      case BEFORE_PRINT:
+        return this._addListener(BEFORE_PRINT, this.beforeHandlers, fn);
 
       default:
-        throwInvalidMethodError(method);
+        throwInvalidMethodError(eventName);
         return;
     }
+  }
 
-    window.addEventListener(eventName, fn);
-    handlersArray.push(fn);
+  /**
+   * convenience function for adding an afterprint listener
+   *
+   * @param {function} fn
+   * @return {function}
+   */
+  after(fn) {
+    return this._addListener(AFTER_PRINT, this.afterHandlers, fn);
+  }
 
-    return fn;
+  /**
+   * convenience function for adding a beforeprint listener
+   * 
+   * @param {function} fn
+   * @return {function}
+   */
+  before(fn) {
+    return this._addListener(BEFORE_PRINT, this.beforeHandlers, fn);
   }
 
   /**
    * removes the handler from the list of handlers for
-   * the given method
+   * the given eventName
    *
    * if the handler is not given, all handlers for the
-   * given method are removed
+   * given eventName are removed
    *
-   * if the method is not given, all handlers across the
+   * if the eventName is not given, all handlers across the
    * board are removed
    *
-   * @param {string} method
+   * @param {string} eventName
    * @param {function} handler
+   * @returns {PrintScout}
    */
-  removeListener(method, handler) {
-    if (!method || !handler) {
-      this._removeAllListeners(method);
+  removeListener(eventName, handler) {
+    if (!eventName || !handler) {
+      this._removeAllListeners(eventName);
       return;
     }
 
-    let eventName,
-        handlersArray;
-
-    switch (method) {
+    switch (eventName) {
       case 'after':
-        eventName = 'afterprint';
-        handlersArray = this.afterHandlers;
-
-        break;
+      case AFTER_PRINT:
+        return this._removeListener(AFTER_PRINT, handler);
 
       case 'before':
-        eventName = 'beforeprint';
-        handlersArray = this.beforeHandlers;
-
-        break;
+      case BEFORE_PRINT:
+        return this._removeListener(BEFORE_PRINT, handler);
 
       default:
-        throwInvalidMethodError(method);
-        return;
+        throwInvalidMethodError(eventName);
+        return this;
     }
-
-    window.removeEventListener(eventName, handler);
-    findAndRemoveHandler(handlersArray, handler);
   }
 }
 

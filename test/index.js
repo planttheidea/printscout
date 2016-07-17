@@ -22,24 +22,64 @@ test('if addListener adds the correct listener', (t) => {
   t.plan(2);
 
   printScout.addListener('after', afterListener);
+  printScout.addListener('afterprint', afterListener);
 
-  t.deepEqual(printScout.afterHandlers, [afterListener]);
+  t.deepEqual(printScout.afterHandlers, [afterListener, afterListener]);
 
   printScout.addListener('before', beforeListener);
+  printScout.addListener('beforeprint', beforeListener);
 
-  t.deepEqual(printScout.beforeHandlers, [beforeListener]);
+  t.deepEqual(printScout.beforeHandlers, [beforeListener, beforeListener]);
 });
 
-test('if removeListener adds the correct listener', (t) => {
-  t.plan(2);
+test('if removeListener removes the correct listener', (t) => {
+  t.plan(4);
 
   printScout.removeListener('after', afterListener);
 
-  t.deepEqual(printScout.afterHandlers, []);
+  t.deepEqual(printScout.afterHandlers, [afterListener]);
 
   printScout.removeListener('before', beforeListener);
 
-  t.deepEqual(printScout.beforeHandlers, []);
+  t.deepEqual(printScout.beforeHandlers, [beforeListener]);
+
+  printScout.removeListener('after');
+
+  t.deepEqual(printScout, {
+    afterHandlers: [],
+    beforeHandlers: [beforeListener]
+  });
+
+  printScout.removeListener();
+
+  t.deepEqual(printScout, {
+    afterHandlers: [],
+    beforeHandlers: []
+  });
+});
+
+test('if after and before convenience functions add listeners', (t) => {
+  t.plan(1);
+
+  printScout.after(afterListener);
+  printScout.before(beforeListener);
+
+  t.deepEqual(printScout, {
+    afterHandlers: [afterListener],
+    beforeHandlers: [beforeListener]
+  });
+});
+
+test('if remove functions added to listeners will remove them from the list of handlers', (t) => {
+  t.plan(1);
+
+  afterListener.remove();
+  beforeListener.remove();
+
+  t.deepEqual(printScout, {
+    afterHandlers: [],
+    beforeHandlers: []
+  });
 });
 
 test('if triggering beforeprint and afterprint will fire listeners', (t) => {
