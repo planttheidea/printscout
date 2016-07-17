@@ -77,8 +77,4 @@ Shorthand method for *scout.removeListener(eventName, handler)*.
 * Edge
 * Safari
 
-That said, because internally `PrintScout` leverages the `onbeforeprint` and `onafterprint` functions that are available in IE5.5+, browser support should extend all the way back to IE9 without issue.
-
-#### Gotchas
-
-The events should trigger correctly if the user triggers the printing, however `before` may not be fired if the printing is triggered programmatically via `window.print()`, depending on the version you are using.
+That said, because internally `PrintScout` leverages the `onbeforeprint` and `onafterprint` functions that are available in IE5.5+, browser support should extend all the way back to IE9 without issue (and even further back if you shim `addEventListener`, `removeEventListener`, and `dispatchEvent`).
