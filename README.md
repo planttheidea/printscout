@@ -39,7 +39,7 @@ const afterPrintHandler = scout.after(() => {
 // and remove them as you would any other listener
 scout.removeListener('before', beforePrintHandler);
 
-// or with the convenience function attached to the handler passed
+// or with the convenience function attached to the handler returned from adding it
 afterPrintHandler.remove();
 ```
 
