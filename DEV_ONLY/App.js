@@ -40,10 +40,10 @@ afterListenerTwo.remove();
 console.log(printScout);
 
 console.log(printScout.afterHandlers[0] === afterListenerOne);
-
-printScout.removeListener();
-
-console.log(printScout);
+//
+// printScout.removeListener();
+//
+// console.log(printScout);
 
 const App = () => {
   return (
