@@ -1,6 +1,6 @@
-const HAS_ON_AFTER_PRINT = !!window.onafterprint;
-const HAS_ON_BEFORE_PRINT = !!window.onbeforeprint;
-const HAS_MATCH_MEDIA_SUPPORT = !!window.matchMedia;
+const HAS_MATCH_MEDIA_SUPPORT = 'matchMedia' in window;
+const HAS_ON_AFTER_PRINT = 'onafterprint' in window;
+const HAS_ON_BEFORE_PRINT = 'onbeforeprint' in window;
 
 const PRINT_MEDIA_QUERY_LIST = HAS_MATCH_MEDIA_SUPPORT ? window.matchMedia('print') : null;
 
@@ -71,14 +71,14 @@ const findAndRemoveHandler = (handlers, handler) => {
  * @param {string} method
  */
 const throwInvalidMethodError = (method) => {
-  throw new TypeError(`The method "${method}" is invalid, it needs to be either "after" or "before".`);
+  throw new Error(`The method "${method}" is invalid, it needs to be either "after" or "before".`);
 };
 
 /**
  * if print event handlers are not supported at all, throw an error
  */
 const throwNotSupportedError = () => {
-  throw new TypeError('Sorry, looks like this browser does not support any print event handlers.');
+  throw new Error('Sorry, looks like this browser does not support any print event handlers.');
 };
 
 export {HAS_MATCH_MEDIA_SUPPORT};
