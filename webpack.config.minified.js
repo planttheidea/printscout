@@ -28,7 +28,7 @@ module.exports = Object.assign({}, defaultConfig, {
             sourceMap: false
         }),
         new OptimizeJsPlugin({
-          sourceMap: true
+          sourceMap: false
         })
     ])
 });;
