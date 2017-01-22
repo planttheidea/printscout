@@ -1,8 +1,12 @@
-const HAS_MATCH_MEDIA_SUPPORT = 'matchMedia' in window;
-const HAS_ON_AFTER_PRINT = 'onafterprint' in window;
-const HAS_ON_BEFORE_PRINT = 'onbeforeprint' in window;
-
-const PRINT_MEDIA_QUERY_LIST = HAS_MATCH_MEDIA_SUPPORT ? window.matchMedia('print') : null;
+// constants
+import {
+  AFTER_PRINT,
+  BEFORE_PRINT,
+  HAS_MATCH_MEDIA_SUPPORT,
+  HAS_ON_AFTER_PRINT,
+  HAS_ON_BEFORE_PRINT,
+  PRINT_MEDIA_QUERY_LIST
+} from './constants';
 
 /**
  * when the Event constructor is supported then use it, else fall back
@@ -11,7 +15,7 @@ const PRINT_MEDIA_QUERY_LIST = HAS_MATCH_MEDIA_SUPPORT ? window.matchMedia('prin
  * @param {string} eventName
  * @return {Event}
  */
-const createNewEvent = (eventName) => {
+export const createNewEvent = (eventName) => {
   try {
     return new Event(eventName);
   } catch (exception) {
@@ -26,7 +30,7 @@ const createNewEvent = (eventName) => {
 if (!HAS_ON_AFTER_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
   PRINT_MEDIA_QUERY_LIST.addListener((mqlEvent) => {
     if (!mqlEvent.matches) {
-      window.dispatchEvent(createNewEvent('afterprint'));
+      window.dispatchEvent(createNewEvent(AFTER_PRINT));
     }
   });
 }
@@ -34,7 +38,7 @@ if (!HAS_ON_AFTER_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
 if (!HAS_ON_BEFORE_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
   PRINT_MEDIA_QUERY_LIST.addListener((mqlEvent) => {
     if (mqlEvent.matches) {
-      window.dispatchEvent(createNewEvent('beforeprint'));
+      window.dispatchEvent(createNewEvent(BEFORE_PRINT));
     }
   });
 }
@@ -47,9 +51,9 @@ if (!HAS_ON_BEFORE_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
  * @param {function} handler
  * @return {array<function>}
  */
-const findAndRemoveHandler = (handlers, handler) => {
+export const findAndRemoveHandler = (handlers, handler) => {
   let handlerIndex = -1,
-    index = -1;
+      index = -1;
 
   while (++index < handlers.length) {
     if (handlers[index] === handler) {
@@ -70,22 +74,13 @@ const findAndRemoveHandler = (handlers, handler) => {
  *
  * @param {string} method
  */
-const throwInvalidMethodError = (method) => {
+export const throwInvalidMethodError = (method) => {
   throw new Error(`The method "${method}" is invalid, it needs to be either "after" or "before".`);
 };
 
 /**
  * if print event handlers are not supported at all, throw an error
  */
-const throwNotSupportedError = () => {
+export const throwNotSupportedError = () => {
   throw new Error('Sorry, looks like this browser does not support any print event handlers.');
 };
-
-export {HAS_MATCH_MEDIA_SUPPORT};
-export {HAS_ON_AFTER_PRINT};
-export {HAS_ON_BEFORE_PRINT};
-
-export {createNewEvent};
-export {findAndRemoveHandler};
-export {throwInvalidMethodError};
-export {throwNotSupportedError};

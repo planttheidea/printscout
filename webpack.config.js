@@ -1,12 +1,12 @@
+'use strict';
+
 const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-    cache: true,
+    cache: false,
 
-    debug: true,
-
-    devtool: 'source-map',
+    devtool: '#source-map',
 
     entry: [
         path.resolve (__dirname, 'src', 'index.js')
@@ -16,17 +16,8 @@ module.exports = {
         configFile: '.eslintrc',
         emitError: true,
         failOnError: true,
-        failOnWarning: false,
+        failOnWarning: true,
         formatter: require('eslint-friendly-formatter')
-    },
-
-    externals: {
-        'stringifier': {
-            amd: 'stringifier',
-            commonjs: 'stringifier',
-            commonjs2: 'stringifier',
-            root: 'stringifier'
-        }
     },
 
     module: {
@@ -43,8 +34,7 @@ module.exports = {
         loaders: [
             {
                 include: [
-                    path.resolve(__dirname, 'src'),
-                    path.resolve(__dirname, 'DEV_ONLY')
+                    path.resolve(__dirname, 'src')
                 ],
                 loader: 'babel',
                 test: /\.js$/
@@ -55,6 +45,7 @@ module.exports = {
     output: {
         filename: 'printscout.js',
         library: 'PrintScout',
+        libraryTarget: 'umd',
         path: path.resolve(__dirname, 'dist'),
         umdNamedDefine: true
     },
@@ -69,10 +60,6 @@ module.exports = {
         extensions: [
             '',
             '.js'
-        ],
-
-        fallback: [
-            path.join (__dirname, 'src')
         ],
 
         root: __dirname
