@@ -1,5 +1,14 @@
-var PrintScout =
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define("PrintScout", [], factory);
+	else if(typeof exports === 'object')
+		exports["PrintScout"] = factory();
+	else
+		root["PrintScout"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -58,14 +67,17 @@ var PrintScout =
 	  value: true
 	});
 	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // constants
 	
-	var _utils = __webpack_require__(2);
+	
+	// utils
+	
+	
+	var _constants = __webpack_require__(2);
+	
+	var _utils = __webpack_require__(3);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	var AFTER_PRINT = 'afterprint';
-	var BEFORE_PRINT = 'beforeprint';
 	
 	var PrintScout = function () {
 	  function PrintScout() {
@@ -74,25 +86,24 @@ var PrintScout =
 	    this.afterHandlers = [];
 	    this.beforeHandlers = [];
 	
-	    if (!_utils.HAS_ON_AFTER_PRINT && !_utils.HAS_ON_BEFORE_PRINT && !_utils.HAS_MATCH_MEDIA_SUPPORT) {
+	    if (!_constants.HAS_ON_AFTER_PRINT && !_constants.HAS_ON_BEFORE_PRINT && !_constants.HAS_MATCH_MEDIA_SUPPORT) {
 	      (0, _utils.throwNotSupportedError)();
 	    }
 	  }
 	
-	  /**
-	   * add listener to list of a handlers and add remove function
-	   * to it
-	   *
-	   * @param {string} eventName
-	   * @param {array<function>} handlers
-	   * @param {function} handler
-	   * @return {function}
-	   * @private
-	   */
-	
-	
 	  _createClass(PrintScout, [{
 	    key: '_addListener',
+	
+	
+	    /**
+	     * add listener to list of a handlers and add remove function
+	     * to it
+	     *
+	     * @param {string} eventName
+	     * @param {array<function>} handlers
+	     * @param {function} handler
+	     * @returns {function}
+	     */
 	    value: function _addListener(eventName, handlers, handler) {
 	      var _this = this;
 	
@@ -113,7 +124,6 @@ var PrintScout =
 	     * or across the board
 	     *
 	     * @param {string} eventName
-	     * @private
 	     */
 	
 	  }, {
@@ -122,32 +132,31 @@ var PrintScout =
 	      var afterHandlerIndex = this.afterHandlers.length,
 	          beforeHandlerIndex = this.beforeHandlers.length;
 	
-	      if (!eventName || eventName === 'after' || eventName === AFTER_PRINT) {
+	      if (!eventName || eventName === _constants.AFTER || eventName === _constants.AFTER_PRINT) {
 	        while (afterHandlerIndex--) {
-	          this._removeListener(AFTER_PRINT, this.afterHandlers[afterHandlerIndex]);
+	          this._removeListener(_constants.AFTER_PRINT, this.afterHandlers[afterHandlerIndex]);
 	        }
 	      }
 	
-	      if (!eventName || eventName === 'before' || eventName === BEFORE_PRINT) {
+	      if (!eventName || eventName === _constants.BEFORE || eventName === _constants.BEFORE_PRINT) {
 	        while (beforeHandlerIndex--) {
-	          this._removeListener(BEFORE_PRINT, this.beforeHandlers[beforeHandlerIndex]);
+	          this._removeListener(_constants.BEFORE_PRINT, this.beforeHandlers[beforeHandlerIndex]);
 	        }
 	      }
 	    }
 	
 	    /**
 	     * remove a specific listener from the appropriate handlers
-	     * 
+	     *
 	     * @param {string} eventName
 	     * @param {function} handler
-	     * @return {PrintScout}
-	     * @private
+	     * @returns {PrintScout}
 	     */
 	
 	  }, {
 	    key: '_removeListener',
 	    value: function _removeListener(eventName, handler) {
-	      var handlers = eventName === AFTER_PRINT ? this.afterHandlers : this.beforeHandlers;
+	      var handlers = eventName === _constants.AFTER_PRINT ? this.afterHandlers : this.beforeHandlers;
 	      var handlerIndex = handlers.indexOf(handler);
 	
 	      if (!!~handlerIndex) {
@@ -172,13 +181,13 @@ var PrintScout =
 	    key: 'addListener',
 	    value: function addListener(eventName, fn) {
 	      switch (eventName) {
-	        case 'after':
-	        case AFTER_PRINT:
-	          return this._addListener(AFTER_PRINT, this.afterHandlers, fn);
+	        case _constants.AFTER:
+	        case _constants.AFTER_PRINT:
+	          return this._addListener(_constants.AFTER_PRINT, this.afterHandlers, fn);
 	
-	        case 'before':
-	        case BEFORE_PRINT:
-	          return this._addListener(BEFORE_PRINT, this.beforeHandlers, fn);
+	        case _constants.BEFORE:
+	        case _constants.BEFORE_PRINT:
+	          return this._addListener(_constants.BEFORE_PRINT, this.beforeHandlers, fn);
 	
 	        default:
 	          (0, _utils.throwInvalidMethodError)(eventName);
@@ -190,26 +199,26 @@ var PrintScout =
 	     * convenience function for adding an afterprint listener
 	     *
 	     * @param {function} fn
-	     * @return {function}
+	     * @returns {function}
 	     */
 	
 	  }, {
 	    key: 'after',
 	    value: function after(fn) {
-	      return this._addListener(AFTER_PRINT, this.afterHandlers, fn);
+	      return this._addListener(_constants.AFTER_PRINT, this.afterHandlers, fn);
 	    }
 	
 	    /**
 	     * convenience function for adding a beforeprint listener
-	     * 
+	     *
 	     * @param {function} fn
-	     * @return {function}
+	     * @returns {function}
 	     */
 	
 	  }, {
 	    key: 'before',
 	    value: function before(fn) {
-	      return this._addListener(BEFORE_PRINT, this.beforeHandlers, fn);
+	      return this._addListener(_constants.BEFORE_PRINT, this.beforeHandlers, fn);
 	    }
 	
 	    /**
@@ -236,13 +245,13 @@ var PrintScout =
 	      }
 	
 	      switch (eventName) {
-	        case 'after':
-	        case AFTER_PRINT:
-	          return this._removeListener(AFTER_PRINT, handler);
+	        case _constants.AFTER:
+	        case _constants.AFTER_PRINT:
+	          return this._removeListener(_constants.AFTER_PRINT, handler);
 	
-	        case 'before':
-	        case BEFORE_PRINT:
-	          return this._removeListener(BEFORE_PRINT, handler);
+	        case _constants.BEFORE:
+	        case _constants.BEFORE_PRINT:
+	          return this._removeListener(_constants.BEFORE_PRINT, handler);
 	
 	        default:
 	          (0, _utils.throwInvalidMethodError)(eventName);
@@ -266,11 +275,29 @@ var PrintScout =
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var HAS_MATCH_MEDIA_SUPPORT = 'matchMedia' in window;
-	var HAS_ON_AFTER_PRINT = 'onafterprint' in window;
-	var HAS_ON_BEFORE_PRINT = 'onbeforeprint' in window;
+	var AFTER = exports.AFTER = 'after';
+	var AFTER_PRINT = exports.AFTER_PRINT = 'afterprint';
+	var BEFORE = exports.BEFORE = 'before';
+	var BEFORE_PRINT = exports.BEFORE_PRINT = 'beforeprint';
 	
-	var PRINT_MEDIA_QUERY_LIST = HAS_MATCH_MEDIA_SUPPORT ? window.matchMedia('print') : null;
+	var HAS_MATCH_MEDIA_SUPPORT = exports.HAS_MATCH_MEDIA_SUPPORT = 'matchMedia' in window;
+	var HAS_ON_AFTER_PRINT = exports.HAS_ON_AFTER_PRINT = 'onafterprint' in window;
+	var HAS_ON_BEFORE_PRINT = exports.HAS_ON_BEFORE_PRINT = 'onbeforeprint' in window;
+	
+	var PRINT_MEDIA_QUERY_LIST = exports.PRINT_MEDIA_QUERY_LIST = HAS_MATCH_MEDIA_SUPPORT ? window.matchMedia('print') : null;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.throwNotSupportedError = exports.throwInvalidMethodError = exports.findAndRemoveHandler = exports.createNewEvent = undefined;
+	
+	var _constants = __webpack_require__(2);
 	
 	/**
 	 * when the Event constructor is supported then use it, else fall back
@@ -279,7 +306,7 @@ var PrintScout =
 	 * @param {string} eventName
 	 * @return {Event}
 	 */
-	var createNewEvent = function createNewEvent(eventName) {
+	var createNewEvent = exports.createNewEvent = function createNewEvent(eventName) {
 	  try {
 	    return new Event(eventName);
 	  } catch (exception) {
@@ -289,20 +316,21 @@ var PrintScout =
 	
 	    return e;
 	  }
-	};
+	}; // constants
 	
-	if (!HAS_ON_AFTER_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
-	  PRINT_MEDIA_QUERY_LIST.addListener(function (mqlEvent) {
+	
+	if (!_constants.HAS_ON_AFTER_PRINT && _constants.HAS_MATCH_MEDIA_SUPPORT) {
+	  _constants.PRINT_MEDIA_QUERY_LIST.addListener(function (mqlEvent) {
 	    if (!mqlEvent.matches) {
-	      window.dispatchEvent(createNewEvent('afterprint'));
+	      window.dispatchEvent(createNewEvent(_constants.AFTER_PRINT));
 	    }
 	  });
 	}
 	
-	if (!HAS_ON_BEFORE_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
-	  PRINT_MEDIA_QUERY_LIST.addListener(function (mqlEvent) {
+	if (!_constants.HAS_ON_BEFORE_PRINT && _constants.HAS_MATCH_MEDIA_SUPPORT) {
+	  _constants.PRINT_MEDIA_QUERY_LIST.addListener(function (mqlEvent) {
 	    if (mqlEvent.matches) {
-	      window.dispatchEvent(createNewEvent('beforeprint'));
+	      window.dispatchEvent(createNewEvent(_constants.BEFORE_PRINT));
 	    }
 	  });
 	}
@@ -315,7 +343,7 @@ var PrintScout =
 	 * @param {function} handler
 	 * @return {array<function>}
 	 */
-	var findAndRemoveHandler = function findAndRemoveHandler(handlers, handler) {
+	var findAndRemoveHandler = exports.findAndRemoveHandler = function findAndRemoveHandler(handlers, handler) {
 	  var handlerIndex = -1,
 	      index = -1;
 	
@@ -338,25 +366,19 @@ var PrintScout =
 	 *
 	 * @param {string} method
 	 */
-	var throwInvalidMethodError = function throwInvalidMethodError(method) {
+	var throwInvalidMethodError = exports.throwInvalidMethodError = function throwInvalidMethodError(method) {
 	  throw new Error('The method "' + method + '" is invalid, it needs to be either "after" or "before".');
 	};
 	
 	/**
 	 * if print event handlers are not supported at all, throw an error
 	 */
-	var throwNotSupportedError = function throwNotSupportedError() {
+	var throwNotSupportedError = exports.throwNotSupportedError = function throwNotSupportedError() {
 	  throw new Error('Sorry, looks like this browser does not support any print event handlers.');
 	};
-	
-	exports.HAS_MATCH_MEDIA_SUPPORT = HAS_MATCH_MEDIA_SUPPORT;
-	exports.HAS_ON_AFTER_PRINT = HAS_ON_AFTER_PRINT;
-	exports.HAS_ON_BEFORE_PRINT = HAS_ON_BEFORE_PRINT;
-	exports.createNewEvent = createNewEvent;
-	exports.findAndRemoveHandler = findAndRemoveHandler;
-	exports.throwInvalidMethodError = throwInvalidMethodError;
-	exports.throwNotSupportedError = throwNotSupportedError;
 
 /***/ }
-/******/ ]);
+/******/ ])
+});
+;
 //# sourceMappingURL=printscout.js.map

@@ -1,3 +1,5 @@
+'use strict';
+
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -7,8 +9,6 @@ const PORT = 3000;
 
 module.exports = {
     cache: true,
-
-    debug: true,
 
     devServer : {
         contentBase: './dist',
@@ -24,7 +24,7 @@ module.exports = {
         }
     },
 
-    devtool: '#eval-cheap-module-source-map',
+    devtool: '#source-map',
 
     entry: [
         path.resolve (__dirname, 'DEV_ONLY', 'App.js')
@@ -41,6 +41,7 @@ module.exports = {
     module: {
         preLoaders: [
             {
+                cacheable: true,
                 include: [
                     path.resolve(__dirname, 'src')
                 ],
@@ -51,11 +52,18 @@ module.exports = {
 
         loaders: [
             {
+                cacheable: true,
                 include: [
                     path.resolve(__dirname, 'src'),
                     path.resolve(__dirname, 'DEV_ONLY')
                 ],
                 loader: 'babel',
+                query: {
+                  cacheDirectory: true,
+                  preset: [
+                    'react'
+                  ]
+                },
                 test: /\.js$/
             }
         ]
@@ -80,10 +88,6 @@ module.exports = {
         extensions: [
             '',
             '.js'
-        ],
-
-        fallback: [
-            path.join (__dirname, 'src')
         ],
 
         root: __dirname

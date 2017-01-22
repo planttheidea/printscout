@@ -1,24 +1,30 @@
+// constants
 import {
-  findAndRemoveHandler,
+  AFTER,
+  AFTER_PRINT,
+  BEFORE,
+  BEFORE_PRINT,
   HAS_MATCH_MEDIA_SUPPORT,
   HAS_ON_AFTER_PRINT,
-  HAS_ON_BEFORE_PRINT,
+  HAS_ON_BEFORE_PRINT
+} from './constants';
+
+// utils
+import {
+  findAndRemoveHandler,
   throwInvalidMethodError,
   throwNotSupportedError
 } from './utils';
 
-const AFTER_PRINT = 'afterprint';
-const BEFORE_PRINT = 'beforeprint';
-
 class PrintScout {
   constructor() {
-    this.afterHandlers = [];
-    this.beforeHandlers = [];
-
     if (!HAS_ON_AFTER_PRINT && !HAS_ON_BEFORE_PRINT && !HAS_MATCH_MEDIA_SUPPORT) {
       throwNotSupportedError();
     }
   }
+
+  afterHandlers = [];
+  beforeHandlers = [];
 
   /**
    * add listener to list of a handlers and add remove function
@@ -27,8 +33,7 @@ class PrintScout {
    * @param {string} eventName
    * @param {array<function>} handlers
    * @param {function} handler
-   * @return {function}
-   * @private
+   * @returns {function}
    */
   _addListener(eventName, handlers, handler) {
     window.addEventListener(eventName, handler);
@@ -48,19 +53,18 @@ class PrintScout {
    * or across the board
    *
    * @param {string} eventName
-   * @private
    */
   _removeAllListeners(eventName) {
     let afterHandlerIndex = this.afterHandlers.length,
         beforeHandlerIndex = this.beforeHandlers.length;
 
-    if (!eventName || eventName === 'after' || eventName === AFTER_PRINT) {
+    if (!eventName || eventName === AFTER || eventName === AFTER_PRINT) {
       while (afterHandlerIndex--) {
         this._removeListener(AFTER_PRINT, this.afterHandlers[afterHandlerIndex]);
       }
     }
 
-    if (!eventName || eventName === 'before' || eventName === BEFORE_PRINT) {
+    if (!eventName || eventName === BEFORE || eventName === BEFORE_PRINT) {
       while (beforeHandlerIndex--) {
         this._removeListener(BEFORE_PRINT, this.beforeHandlers[beforeHandlerIndex]);
       }
@@ -69,11 +73,10 @@ class PrintScout {
 
   /**
    * remove a specific listener from the appropriate handlers
-   * 
+   *
    * @param {string} eventName
    * @param {function} handler
-   * @return {PrintScout}
-   * @private
+   * @returns {PrintScout}
    */
   _removeListener(eventName, handler) {
     const handlers = eventName === AFTER_PRINT ? this.afterHandlers : this.beforeHandlers;
@@ -98,11 +101,11 @@ class PrintScout {
    */
   addListener(eventName, fn) {
     switch (eventName) {
-      case 'after':
+      case AFTER:
       case AFTER_PRINT:
         return this._addListener(AFTER_PRINT, this.afterHandlers, fn);
 
-      case 'before':
+      case BEFORE:
       case BEFORE_PRINT:
         return this._addListener(BEFORE_PRINT, this.beforeHandlers, fn);
 
@@ -116,7 +119,7 @@ class PrintScout {
    * convenience function for adding an afterprint listener
    *
    * @param {function} fn
-   * @return {function}
+   * @returns {function}
    */
   after(fn) {
     return this._addListener(AFTER_PRINT, this.afterHandlers, fn);
@@ -124,9 +127,9 @@ class PrintScout {
 
   /**
    * convenience function for adding a beforeprint listener
-   * 
+   *
    * @param {function} fn
-   * @return {function}
+   * @returns {function}
    */
   before(fn) {
     return this._addListener(BEFORE_PRINT, this.beforeHandlers, fn);
@@ -153,11 +156,11 @@ class PrintScout {
     }
 
     switch (eventName) {
-      case 'after':
+      case AFTER:
       case AFTER_PRINT:
         return this._removeListener(AFTER_PRINT, handler);
 
-      case 'before':
+      case BEFORE:
       case BEFORE_PRINT:
         return this._removeListener(BEFORE_PRINT, handler);
 
