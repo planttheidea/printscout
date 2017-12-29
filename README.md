@@ -59,7 +59,7 @@ Adds the `handler` to the list of handlers that will fire when the specific `eve
 ```javascript
 const scout = new PrintScout();
 
-const handler = scout.on('after', event => console.log(event));
+const handler = scout.on('afterprint', event => console.log(event));
 ```
 
 Additionally, the `handler` passed receives an additional `off` method attached to it, which will remove the listener when called directly.
@@ -77,9 +77,9 @@ Removes the `handler` from the list of handlers that will fire when the specific
 ```javascript
 const scout = new PrintScout();
 
-const handler = scout.on('before', console.log('about to print...'));
+const handler = scout.on('beforeprint', console.log('about to print...'));
 ...
-scout.off('before', handler);
+scout.off('beforeprint', handler);
 ```
 
 #### after
