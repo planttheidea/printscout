@@ -1,6 +1,6 @@
 # PrintScout
 
-Simple, cross-browser print event listeners with no dependencies
+Simple, cross-browser print event listeners (before and after) with no dependencies
 
 ## Table of contents
 

@@ -38,11 +38,12 @@
     "webpack": "^3.10.0",
     "webpack-dev-server": "^2.9.7"
   },
-  "description": "Handle print events with ease",
+  "description": "Simple, cross-browser print event listeners (before and after) with no dependencies",
   "homepage": "https://github.com/planttheidea/printscout#readme",
-  "keywords": ["print", "beforeprint", "afterprint", "matchMedia", "print", "events"],
+  "keywords": ["print", "beforeprint", "afterprint", "matchMedia", "event listeners"],
   "license": "MIT",
   "main": "lib/index.js",
+  "module": "es/index.js",
   "name": "printscout",
   "repository": {
     "type": "git",
