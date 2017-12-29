@@ -1,96 +1,151 @@
-import test from 'tape';
+// test
+import test from 'ava';
 import sinon from 'sinon';
 
-import './utils';
+// src
+import PrintScout from 'src/index';
+import {AFTER_PRINT, BEFORE_PRINT} from 'src/constants';
+import * as utils from 'src/utils';
 
-import PrintScout from '../src/index';
+const scout = new PrintScout();
 
-const printScout = new PrintScout();
-
-test('if printScout has the correct setup', (t) => {
-  t.plan(3);
-
-  t.is(printScout.constructor, PrintScout);
-  t.deepEqual(printScout.afterHandlers, []);
-  t.deepEqual(printScout.beforeHandlers, []);
+test.serial('if the PrintScout instance has the correct shape', (t) => {
+  t.deepEqual(
+    {...scout},
+    {
+      handlers: {
+        [AFTER_PRINT]: [],
+        [BEFORE_PRINT]: []
+      }
+    }
+  );
 });
 
-const afterListener = sinon.stub();
-const beforeListener = sinon.stub();
+const afterListener = sinon.spy();
+const afterPrintListener = sinon.spy();
 
-test('if addListener adds the correct listener', (t) => {
-  t.plan(2);
+const beforeListener = sinon.spy();
+const beforePrintListener = sinon.spy();
 
-  printScout.addListener('after', afterListener);
-  printScout.addListener('afterprint', afterListener);
+test.serial('if on adds the correct listener', (t) => {
+  scout.on('after', afterListener);
 
-  t.deepEqual(printScout.afterHandlers, [afterListener, afterListener]);
+  t.deepEqual(scout.handlers.afterprint, [afterListener]);
 
-  printScout.addListener('before', beforeListener);
-  printScout.addListener('beforeprint', beforeListener);
+  scout.on('afterprint', afterPrintListener);
 
-  t.deepEqual(printScout.beforeHandlers, [beforeListener, beforeListener]);
+  t.deepEqual(scout.handlers.afterprint, [afterListener, afterPrintListener]);
+
+  scout.on('before', beforeListener);
+
+  t.deepEqual(scout.handlers.beforeprint, [beforeListener]);
+
+  scout.on('beforeprint', beforePrintListener);
+
+  t.deepEqual(scout.handlers.beforeprint, [beforeListener, beforePrintListener]);
 });
 
-test('if removeListener removes the correct listener', (t) => {
-  t.plan(4);
+test.serial('if off removes the correct listener when the listener is provided', (t) => {
+  scout.off('after', afterListener);
 
-  printScout.removeListener('after', afterListener);
+  t.deepEqual(scout.handlers.afterprint, [afterPrintListener]);
 
-  t.deepEqual(printScout.afterHandlers, [afterListener]);
+  scout.off('afterprint', afterPrintListener);
 
-  printScout.removeListener('before', beforeListener);
+  t.deepEqual(scout.handlers.afterprint, []);
 
-  t.deepEqual(printScout.beforeHandlers, [beforeListener]);
+  scout.off('before', beforeListener);
 
-  printScout.removeListener('after');
+  t.deepEqual(scout.handlers.beforeprint, [beforePrintListener]);
 
-  t.deepEqual(printScout, {
-    afterHandlers: [],
-    beforeHandlers: [beforeListener]
-  });
+  scout.off('beforeprint', beforePrintListener);
 
-  printScout.removeListener();
-
-  t.deepEqual(printScout, {
-    afterHandlers: [],
-    beforeHandlers: []
-  });
+  t.deepEqual(scout.handlers.beforeprint, []);
 });
 
-test('if after and before convenience functions add listeners', (t) => {
-  t.plan(1);
+test.serial('if off removes the all the listeners for the correct type when only the event is provided', (t) => {
+  scout.after(afterListener);
+  scout.after(afterPrintListener);
+  scout.before(beforeListener);
+  scout.before(beforePrintListener);
 
-  printScout.after(afterListener);
-  printScout.before(beforeListener);
+  scout.off('after');
 
-  t.deepEqual(printScout, {
-    afterHandlers: [afterListener],
-    beforeHandlers: [beforeListener]
-  });
+  t.deepEqual(scout.handlers.afterprint, []);
+  t.deepEqual(scout.handlers.beforeprint, [beforeListener, beforePrintListener]);
+
+  scout.off('before');
+
+  t.deepEqual(scout.handlers.afterprint, []);
+  t.deepEqual(scout.handlers.beforeprint, []);
 });
 
-test('if remove functions added to listeners will remove them from the list of handlers', (t) => {
-  t.plan(1);
+test.serial('if off removes all listeners when no event is provided', (t) => {
+  scout.after(afterListener);
+  scout.after(afterPrintListener);
+  scout.before(beforeListener);
+  scout.before(beforePrintListener);
 
-  afterListener.remove();
-  beforeListener.remove();
+  t.deepEqual(scout.handlers.afterprint, [afterListener, afterPrintListener]);
+  t.deepEqual(scout.handlers.beforeprint, [beforeListener, beforePrintListener]);
 
-  t.deepEqual(printScout, {
-    afterHandlers: [],
-    beforeHandlers: []
-  });
+  scout.off();
+
+  t.deepEqual(scout.handlers.afterprint, []);
+  t.deepEqual(scout.handlers.beforeprint, []);
 });
 
-test('if triggering beforeprint and afterprint will fire listeners', (t) => {
-  t.plan(2);
+test.serial('if after and before convenience methods add listeners like on', (t) => {
+  scout.after(afterListener);
 
-  printScout.addListener('after', afterListener);
-  printScout.addListener('before', beforeListener);
+  t.deepEqual(scout.handlers.afterprint, [afterListener]);
 
-  window.dispatchEvent(new Event('beforeprint'));
-  window.dispatchEvent(new Event('afterprint'));
+  scout.before(beforeListener);
+
+  t.deepEqual(scout.handlers.beforeprint, [beforeListener]);
+});
+
+test.serial('if the off methods added to handlers will trigger removal from the list', (t) => {
+  const stub = sinon.stub(window, 'removeEventListener');
+
+  afterListener.off();
+
+  t.true(stub.calledOnce);
+  t.true(stub.calledWith(AFTER_PRINT, afterListener));
+
+  stub.reset();
+
+  t.deepEqual(scout.handlers.afterprint, []);
+
+  beforeListener.off();
+
+  t.true(stub.calledOnce);
+  t.true(stub.calledWith(BEFORE_PRINT, beforeListener));
+
+  stub.restore();
+
+  t.deepEqual(scout.handlers.beforeprint, []);
+});
+
+test.serial('if triggering the events will fire the listeners', (t) => {
+  scout.after(afterListener);
+  scout.before(beforeListener);
+
+  const beforePrintEvent = utils.createNewEvent(BEFORE_PRINT);
+
+  window.dispatchEvent(beforePrintEvent);
+
+  t.true(beforeListener.calledOnce);
+  t.true(beforeListener.calledWith(beforePrintEvent));
+
+  t.true(afterListener.notCalled);
+
+  const afterPrintEvent = utils.createNewEvent(AFTER_PRINT);
+
+  window.dispatchEvent(afterPrintEvent);
+
+  t.true(beforeListener.calledOnce);
 
   t.true(afterListener.calledOnce);
-  t.true(beforeListener.calledOnce);
+  t.true(afterListener.calledWith(afterPrintEvent));
 });
