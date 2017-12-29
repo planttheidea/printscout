@@ -33,7 +33,7 @@ const beforePrintHandler = () => {
   console.log('I fire before print render');
 };
 
-scout.on('before', beforePrintHandler);
+scout.on('beforeprint', beforePrintHandler);
 
 // or you can do it dynamically, the handler you passed is returned when added,
 // either with the shorthand methods or the standard ones
@@ -42,7 +42,7 @@ const afterPrintHandler = scout.after(() => {
 });
 
 // and remove them as you would any other listener
-scout.off('before', beforePrintHandler);
+scout.off('beforeprint', beforePrintHandler);
 
 // or with the convenience function attached to the handler returned from adding it
 afterPrintHandler.off();

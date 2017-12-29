@@ -11,15 +11,17 @@ import {AFTER, AFTER_PRINT, BEFORE, BEFORE_PRINT, HAS_NEW_ERROR_SUPPORT} from '.
  * @returns {string} the normalized event name
  */
 export const getNormalizedEventName = (eventName) => {
-  if (eventName === AFTER_PRINT || eventName === AFTER) {
+  const lowercaseName = eventName.toLowerCase();
+
+  if (lowercaseName === AFTER_PRINT || lowercaseName === AFTER) {
     return AFTER_PRINT;
   }
 
-  if (eventName === BEFORE_PRINT || eventName === BEFORE) {
+  if (lowercaseName === BEFORE_PRINT || lowercaseName === BEFORE) {
     return BEFORE_PRINT;
   }
 
-  throw new ReferenceError(`The event "${eventName}" is invalid, it must be either "after" or "before".`);
+  throw new ReferenceError(`The event "${eventName}" is invalid, it must be either "afterprint" or "beforeprint".`);
 };
 
 /**

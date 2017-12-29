@@ -14,7 +14,7 @@ test('if getNormalizedEventName will return afterprint when already afterprint',
   t.is(result, AFTER_PRINT);
 });
 
-test('if getNormalizedEventName will return afterprint when the after shorthand', (t) => {
+test('if getNormalizedEventName will return afterprint when the after shorthand is used', (t) => {
   const eventName = 'after';
 
   const result = utils.getNormalizedEventName(eventName);
@@ -30,8 +30,16 @@ test('if getNormalizedEventName will return beforeprint when already beforeprint
   t.is(result, BEFORE_PRINT);
 });
 
-test('if getNormalizedEventName will return beforeprint when the before shorthand', (t) => {
+test('if getNormalizedEventName will return beforeprint when the before shorthand is used', (t) => {
   const eventName = 'before';
+
+  const result = utils.getNormalizedEventName(eventName);
+
+  t.is(result, BEFORE_PRINT);
+});
+
+test('if getNormalizedEventName will handle incorrect casing', (t) => {
+  const eventName = 'beforePrint';
 
   const result = utils.getNormalizedEventName(eventName);
 
