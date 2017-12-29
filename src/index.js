@@ -1,173 +1,135 @@
 // constants
 import {
-  AFTER,
   AFTER_PRINT,
-  BEFORE,
   BEFORE_PRINT,
   HAS_MATCH_MEDIA_SUPPORT,
-  HAS_ON_AFTER_PRINT,
-  HAS_ON_BEFORE_PRINT
+  HAS_ON_AFTER_PRINT_SUPPORT,
+  HAS_ON_BEFORE_PRINT_SUPPORT,
+  PRINT_MEDIA_QUERY_LIST,
+  SUPPORTS_PRINT_EVENT_HANDLERS
 } from './constants';
 
 // utils
-import {
-  findAndRemoveHandler,
-  throwInvalidMethodError,
-  throwNotSupportedError
-} from './utils';
+import {addListener, createNewEvent, getNormalizedEventName, removeListener} from './utils';
 
+/**
+ * @description
+ * if there is no support for the afterprint event, whenever the media query for
+ * print changes, manually dispatch it
+ */
+if (!HAS_ON_AFTER_PRINT_SUPPORT && HAS_MATCH_MEDIA_SUPPORT) {
+  PRINT_MEDIA_QUERY_LIST.addListener((mqlEvent) => {
+    if (!mqlEvent.matches) {
+      window.dispatchEvent(createNewEvent(AFTER_PRINT));
+    }
+  });
+}
+
+/**
+ * @description
+ * if there is no support for the beforeprint event, whenever the media query for
+ * print changes, manually dispatch it
+ */
+if (!HAS_ON_BEFORE_PRINT_SUPPORT && HAS_MATCH_MEDIA_SUPPORT) {
+  PRINT_MEDIA_QUERY_LIST.addListener((mqlEvent) => {
+    if (mqlEvent.matches) {
+      window.dispatchEvent(createNewEvent(BEFORE_PRINT));
+    }
+  });
+}
+
+/**
+ * @class PrintScout
+ * @classdesc instance of handlers for before / after print is triggered
+ */
 class PrintScout {
   constructor() {
-    if (!HAS_ON_AFTER_PRINT && !HAS_ON_BEFORE_PRINT && !HAS_MATCH_MEDIA_SUPPORT) {
-      throwNotSupportedError();
-    }
-  }
-
-  afterHandlers = [];
-  beforeHandlers = [];
-
-  /**
-   * add listener to list of a handlers and add remove function
-   * to it
-   *
-   * @param {string} eventName
-   * @param {array<function>} handlers
-   * @param {function} handler
-   * @returns {function}
-   */
-  _addListener(eventName, handlers, handler) {
-    window.addEventListener(eventName, handler);
-    handlers.push(handler);
-
-    handler.remove = () => {
-      this._removeListener(eventName, handler);
-
-      delete handler.remove;
-    };
-
-    return handler;
-  }
-
-  /**
-   * remove all listeners, either to the specific eventName if provided,
-   * or across the board
-   *
-   * @param {string} eventName
-   */
-  _removeAllListeners(eventName) {
-    let afterHandlerIndex = this.afterHandlers.length,
-        beforeHandlerIndex = this.beforeHandlers.length;
-
-    if (!eventName || eventName === AFTER || eventName === AFTER_PRINT) {
-      while (afterHandlerIndex--) {
-        this._removeListener(AFTER_PRINT, this.afterHandlers[afterHandlerIndex]);
-      }
-    }
-
-    if (!eventName || eventName === BEFORE || eventName === BEFORE_PRINT) {
-      while (beforeHandlerIndex--) {
-        this._removeListener(BEFORE_PRINT, this.beforeHandlers[beforeHandlerIndex]);
-      }
+    if (!SUPPORTS_PRINT_EVENT_HANDLERS) {
+      throw new ReferenceError('Sorry, looks like this browser does not support print event handlers.');
     }
   }
 
   /**
-   * remove a specific listener from the appropriate handlers
-   *
-   * @param {string} eventName
-   * @param {function} handler
-   * @returns {PrintScout}
+   * @var {{afterprint: Array<function>, beforeprint: Array<function>}} handlers
+   * @instance
    */
-  _removeListener(eventName, handler) {
-    const handlers = eventName === AFTER_PRINT ? this.afterHandlers : this.beforeHandlers;
-    const handlerIndex = handlers.indexOf(handler);
+  handlers = {
+    afterprint: [],
+    beforeprint: []
+  };
 
-    if (!!~handlerIndex) {
-      const handler = handlers[handlerIndex];
-
-      window.removeEventListener(eventName, handler);
-      findAndRemoveHandler(handlers, handler);
-    }
-
-    return this;
+  /**
+   * @function add
+   * @memberof PrintScout
+   *
+   * @description
+   * convenience method to add an afterprint event listener
+   *
+   * @param {function} handler the handler for the new listener
+   * @returns {function} the handler
+   */
+  after(handler) {
+    return this.on(AFTER_PRINT, handler);
   }
 
   /**
-   * adds fn to the list of handlers
+   * @function before
+   * @memberof PrintScout
    *
-   * @param {string} eventName
-   * @param {function} fn
-   * @returns {function}
+   * @description
+   * convenience method to add a beforeprint event listener
+   *
+   * @param {function} handler the handler for the new listener
+   * @returns {function} the handler
    */
-  addListener(eventName, fn) {
-    switch (eventName) {
-      case AFTER:
-      case AFTER_PRINT:
-        return this._addListener(AFTER_PRINT, this.afterHandlers, fn);
-
-      case BEFORE:
-      case BEFORE_PRINT:
-        return this._addListener(BEFORE_PRINT, this.beforeHandlers, fn);
-
-      default:
-        throwInvalidMethodError(eventName);
-        return;
-    }
+  before(handler) {
+    return this.on(BEFORE_PRINT, handler);
   }
 
   /**
-   * convenience function for adding an afterprint listener
+   * @function on
+   * @memberof PrintScout
    *
-   * @param {function} fn
-   * @returns {function}
+   * @description
+   * add a new event listener based on the eventName passed
+   *
+   * @param {string} eventName the name of the event to listen for
+   * @param {function} handler th handler for the event
+   * @returns {function} the handler
    */
-  after(fn) {
-    return this._addListener(AFTER_PRINT, this.afterHandlers, fn);
+  on(eventName, handler) {
+    return addListener(this.handlers, eventName, handler);
   }
 
   /**
-   * convenience function for adding a beforeprint listener
+   * @function off
+   * @memberof PrintScout
    *
-   * @param {function} fn
-   * @returns {function}
+   * @description
+   * remove an event listener, or a series of event listeners
+   *
+   * @param {string} [eventName] the name of the event to stop listening for
+   * @param {function} [handler] the handler to remove
+   * @returns {PrintScout} the instance
    */
-  before(fn) {
-    return this._addListener(BEFORE_PRINT, this.beforeHandlers, fn);
-  }
-
-  /**
-   * removes the handler from the list of handlers for
-   * the given eventName
-   *
-   * if the handler is not given, all handlers for the
-   * given eventName are removed
-   *
-   * if the eventName is not given, all handlers across the
-   * board are removed
-   *
-   * @param {string} eventName
-   * @param {function} handler
-   * @returns {PrintScout}
-   */
-  removeListener(eventName, handler) {
-    if (!eventName || !handler) {
-      this._removeAllListeners(eventName);
-      return;
+  off(eventName, handler) {
+    if (handler) {
+      return removeListener(this.handlers, eventName, handler);
     }
 
-    switch (eventName) {
-      case AFTER:
-      case AFTER_PRINT:
-        return this._removeListener(AFTER_PRINT, handler);
+    if (eventName) {
+      const event = getNormalizedEventName(eventName);
 
-      case BEFORE:
-      case BEFORE_PRINT:
-        return this._removeListener(BEFORE_PRINT, handler);
-
-      default:
-        throwInvalidMethodError(eventName);
-        return this;
+      return this.handlers[event].forEach((handler) => {
+        removeListener(this.handlers, event, handler);
+      });
     }
+
+    return Object.keys(this.handlers).forEach((type) => {
+      this.handlers[type].forEach((handler) => {
+        removeListener(this.handlers, type, handler);
+      });
+    });
   }
 }
 

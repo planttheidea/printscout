@@ -1,3 +1,9 @@
-global.document = require('jsdom').jsdom('<body></body>');
-global.window = document.defaultView;
-global.navigator = window.navigator;
+import browserEnv from 'browser-env';
+
+browserEnv();
+
+window.matchMedia =
+  window.matchMedia ||
+  (() => {
+    return {matches: false, addListener: () => {}, removeListener: () => {}};
+  });

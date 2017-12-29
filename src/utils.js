@@ -1,86 +1,111 @@
 // constants
-import {
-  AFTER_PRINT,
-  BEFORE_PRINT,
-  HAS_MATCH_MEDIA_SUPPORT,
-  HAS_ON_AFTER_PRINT,
-  HAS_ON_BEFORE_PRINT,
-  PRINT_MEDIA_QUERY_LIST
-} from './constants';
+import {AFTER, AFTER_PRINT, BEFORE, BEFORE_PRINT, HAS_NEW_ERROR_SUPPORT} from './constants';
 
 /**
+ * @function getNormalizedEventName
+ *
+ * @description
+ * get the normalized event name for the print action
+ *
+ * @param {string} eventName the name of the event to trigger
+ * @returns {string} the normalized event name
+ */
+export const getNormalizedEventName = (eventName) => {
+  if (eventName === AFTER_PRINT || eventName === AFTER) {
+    return AFTER_PRINT;
+  }
+
+  if (eventName === BEFORE_PRINT || eventName === BEFORE) {
+    return BEFORE_PRINT;
+  }
+
+  throw new ReferenceError(`The event "${eventName}" is invalid, it must be either "after" or "before".`);
+};
+
+/**
+ * @function removeListener
+ *
+ * @description
+ * remove an existing listener with the handler function passed
+ *
+ * @param {{afterprint: Array<function>, beforeprint: Array<function>}} handlers the instance handlers
+ * @param {string} eventName the event name passed
+ * @param {function} handler the handler to unapply
+ */
+export const removeListener = (handlers, eventName, handler) => {
+  const event = getNormalizedEventName(eventName);
+  const indexOfHandler = handlers[event].indexOf(handler);
+
+  if (~indexOfHandler) {
+    window.removeEventListener(event, handler);
+
+    handlers[event] = [...handlers[event].slice(0, indexOfHandler), ...handlers[event].slice(indexOfHandler + 1)];
+  }
+};
+
+/**
+ * @function addListener
+ *
+ * @description
+ * add a new listener with the handler function passed
+ *
+ * @param {{afterprint: Array<function>, beforeprint: Array<function>}} handlers the instance handlers
+ * @param {string} eventName the event name passed
+ * @param {function} handler the handler to apply
+ * @returns {function} the handler
+ */
+export const addListener = (handlers, eventName, handler) => {
+  const event = getNormalizedEventName(eventName);
+
+  window.addEventListener(event, handler);
+
+  handler.off = () => {
+    removeListener(handlers, event, handler);
+  };
+
+  handlers[event] = [...handlers[event], handler];
+
+  return handler;
+};
+
+/**
+ * @function createNewEventLegacy
+ *
+ * @description
+ * if new Event() syntax is unsupported, use the legacy technique to create a new event
+ *
+ * @param {string} eventName the name of the event to fire
+ * @returns {Event} the event to fire
+ */
+export const createNewEventLegacy = (eventName) => {
+  const event = document.createEvent('Event');
+
+  event.initEvent(eventName, false, false);
+
+  return event;
+};
+
+/**
+ * @function createNewEventModern
+ *
+ * @description
+ * if new Event() syntax is supported, use it to create a new event
+ *
+ * @param {string} eventName the name of the event to fire
+ * @returns {Event} the event to fire
+ */
+export const createNewEventModern = (eventName) => {
+  return new Event(eventName);
+};
+
+/**
+ * @function createNewEvent
+ *
+ * @description
  * when the Event constructor is supported then use it, else fall back
  * to creating event the old-fashioned way
  *
- * @param {string} eventName
- * @return {Event}
+ * @param {string} eventName the name of the event to create
+ * @return {Event} the generated event
  */
-export const createNewEvent = (eventName) => {
-  try {
-    return new Event(eventName);
-  } catch (exception) {
-    const e = document.createEvent('Event');
-
-    e.initEvent(eventName, false, false);
-
-    return e;
-  }
-};
-
-if (!HAS_ON_AFTER_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
-  PRINT_MEDIA_QUERY_LIST.addListener((mqlEvent) => {
-    if (!mqlEvent.matches) {
-      window.dispatchEvent(createNewEvent(AFTER_PRINT));
-    }
-  });
-}
-
-if (!HAS_ON_BEFORE_PRINT && HAS_MATCH_MEDIA_SUPPORT) {
-  PRINT_MEDIA_QUERY_LIST.addListener((mqlEvent) => {
-    if (mqlEvent.matches) {
-      window.dispatchEvent(createNewEvent(BEFORE_PRINT));
-    }
-  });
-}
-
-/**
- * find the matching handler and remove it from the
- * list of handlers
- *
- * @param {array<function>} handlers
- * @param {function} handler
- * @return {array<function>}
- */
-export const findAndRemoveHandler = (handlers, handler) => {
-  let handlerIndex = -1,
-      index = -1;
-
-  while (++index < handlers.length) {
-    if (handlers[index] === handler) {
-      handlerIndex = index;
-      break;
-    }
-  }
-
-  if (!!~handlerIndex) {
-    handlers.splice(handlerIndex, 1);
-  }
-
-  return handlers;
-};
-
-/**
- * if the method is invalid throw a new TypeError
- *
- * @param {string} method
- */
-export const throwInvalidMethodError = (method) => {
-  throw new Error(`The method "${method}" is invalid, it needs to be either "after" or "before".`);
-};
-
-/**
- * if print event handlers are not supported at all, throw an error
- */
-export const throwNotSupportedError = () => {
-  throw new Error('Sorry, looks like this browser does not support any print event handlers.');
-};
+export const createNewEvent = HAS_NEW_ERROR_SUPPORT ? createNewEventModern : createNewEventLegacy;
