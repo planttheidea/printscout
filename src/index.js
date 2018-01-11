@@ -45,7 +45,7 @@ if (!HAS_ON_BEFORE_PRINT_SUPPORT && HAS_MATCH_MEDIA_SUPPORT) {
 class PrintScout {
   constructor() {
     if (!SUPPORTS_PRINT_EVENT_HANDLERS) {
-      throw new ReferenceError('Sorry, looks like this browser does not support print event handlers.');
+      console.log('Sorry, looks like this browser does not support print event handlers.'); // eslint-disable-line no-console
     }
   }
 
