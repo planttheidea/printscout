@@ -5,43 +5,57 @@ import PrintScout from '../src';
 
 const printScout = new PrintScout();
 
-const beforeListenerOne = (e) => {
-  console.log('before one', e);
+console.log('after (0)', printScout.handlers.afterprint);
+console.log('before (0)', printScout.handlers.beforeprint);
+
+const beforeListenerOne = (event) => {
+  console.log('before one', event);
 };
 
 printScout.on('before', beforeListenerOne);
 
-const beforeListenerTwo = printScout.before((e) => {
-  console.log('before two', e);
+console.log('after (0)', printScout.handlers.afterprint);
+console.log('before (1)', printScout.handlers.beforeprint);
+
+const beforeListenerTwo = printScout.before((event) => {
+  console.log('before two', event);
 });
 
-const afterListenerOne = (e) => {
-  console.log('after one', e);
+console.log('after (0)', printScout.handlers.afterprint);
+console.log('before (2)', printScout.handlers.beforeprint);
+
+const afterListenerOne = (event) => {
+  console.log('after one', event);
 };
 
 printScout.on('after', afterListenerOne);
 
-const afterListenerTwo = (e) => {
-  console.log('after two', e);
+console.log('after (1)', printScout.handlers.afterprint);
+console.log('before (2)', printScout.handlers.beforeprint);
+
+const afterListenerTwo = (event) => {
+  console.log('after two', event);
 };
 
 printScout.on('afterprint', afterListenerTwo);
 
-console.log(printScout);
+console.log('after (2)', printScout.handlers.afterprint);
+console.log('before (2)', printScout.handlers.beforeprint);
 
-printScout.off('beforeprint', beforeListenerOne);
+// printScout.off('beforeprint', beforeListenerOne);
 
-console.log(printScout);
+// console.log('after (2)', printScout.handlers.afterprint);
+// console.log('before (1)', printScout.handlers.beforeprint);
 
-afterListenerTwo.off();
+// printScout.off('after');
 
-console.log(printScout);
+// console.log('after (0)', printScout.handlers.afterprint);
+// console.log('before (1)', printScout.handlers.beforeprint);
 
-console.log(printScout.handlers.afterprint[0] === afterListenerOne);
+// beforeListenerTwo.off();
 
-printScout.off();
-
-console.log(printScout);
+// console.log('after (0)', printScout.handlers.afterprint);
+// console.log('before (0)', printScout.handlers.beforeprint);
 
 const App = () => {
   return <div>App</div>;
