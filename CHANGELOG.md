@@ -1,5 +1,13 @@
 # PrintScout changelog
 
+## 2.0.2
+
+* Prevent determination of support until runtime with window (better SSR support)
+
+## 2.0.1
+
+* `console.log` no print event support rather than `throw new Error`
+
 ## 2.0.0
 
 * Rewritten for speed, testability, and smaller footprint

@@ -1,5 +1,5 @@
 // constants
-import {AFTER, AFTER_PRINT, BEFORE, BEFORE_PRINT, HAS_NEW_ERROR_SUPPORT} from './constants';
+import {AFTER, AFTER_PRINT, BEFORE, BEFORE_PRINT, GLOBAL_VALUES} from './constants';
 
 /**
  * @function getNormalizedEventName
@@ -61,8 +61,8 @@ export const addListener = (handlers, eventName, handler) => {
 
   window.addEventListener(event, handler);
 
-  handler.off = () => {
-    removeListener(handlers, event, handler);
+  handler.off = function off() {
+    removeListener.call(this, handlers, event, handler);
   };
 
   handlers[event] = [...handlers[event], handler];
@@ -101,13 +101,67 @@ export const createNewEventModern = (eventName) => {
 };
 
 /**
- * @function createNewEvent
+ * @function isBrowser
  *
  * @description
- * when the Event constructor is supported then use it, else fall back
- * to creating event the old-fashioned way
+ * are we in a browser environment
  *
- * @param {string} eventName the name of the event to create
- * @return {Event} the generated event
+ * @returns  {boolean} are we in a browser
  */
-export const createNewEvent = HAS_NEW_ERROR_SUPPORT ? createNewEventModern : createNewEventLegacy;
+export const isBrowser = () => {
+  return typeof window !== 'undefined';
+};
+
+/**
+ * @function onInitialLoad
+ *
+ * @description
+ * on load, set the global values for support and media queries
+ *
+ * @returns {void}
+ */
+export const onInitialLoad = () => {
+  if (!isBrowser()) {
+    return;
+  }
+
+  GLOBAL_VALUES.hasMatchMediaSupport = 'matchMedia' in window;
+  GLOBAL_VALUES.hasOnAfterPrintSupport = `on${AFTER_PRINT}` in window;
+  GLOBAL_VALUES.hasOnBeforePrintSupport = `on${BEFORE_PRINT}` in window;
+
+  GLOBAL_VALUES.hasPrintEventSupport =
+    GLOBAL_VALUES.hasMatchMediaSupport ||
+    (GLOBAL_VALUES.hasOnAfterPrintSupport && GLOBAL_VALUES.hasOnBeforePrintSupport);
+
+  try {
+    new Event(AFTER_PRINT);
+
+    GLOBAL_VALUES.hasNewErrorSupport = true;
+  } catch (error) {
+    GLOBAL_VALUES.hasNewErrorSupport = false;
+  }
+
+  GLOBAL_VALUES.createNewEvent = GLOBAL_VALUES.hasNewErrorSupport ? createNewEventModern : createNewEventLegacy;
+
+  if (GLOBAL_VALUES.hasMatchMediaSupport) {
+    GLOBAL_VALUES.mql = window.matchMedia('print');
+
+    if (!GLOBAL_VALUES.hasOnAfterPrintSupport) {
+      GLOBAL_VALUES.mql.addListener((mqlEvent) => {
+        if (!mqlEvent.matches) {
+          window.dispatchEvent(GLOBAL_VALUES.createNewEvent(AFTER_PRINT));
+        }
+      });
+    }
+
+    if (!GLOBAL_VALUES.hasOnBeforePrintSupport) {
+      GLOBAL_VALUES.mql.addListener((mqlEvent) => {
+        if (mqlEvent.matches) {
+          window.dispatchEvent(GLOBAL_VALUES.createNewEvent(AFTER_PRINT));
+        }
+      });
+    }
+  }
+
+  GLOBAL_VALUES.isInitialized = true;
+};

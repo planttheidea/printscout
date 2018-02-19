@@ -4,10 +4,38 @@ import sinon from 'sinon';
 
 // src
 import PrintScout from 'src/index';
-import {AFTER_PRINT, BEFORE_PRINT} from 'src/constants';
-import * as utils from 'src/utils';
+import {AFTER_PRINT, BEFORE_PRINT, GLOBAL_VALUES} from 'src/constants';
 
-const scout = new PrintScout();
+const afterListener = sinon.spy();
+const afterPrintListener = sinon.spy();
+
+const beforeListener = sinon.spy();
+const beforePrintListener = sinon.spy();
+
+let scout = null;
+
+test.before(() => {
+  scout = new PrintScout();
+});
+
+test.serial(
+  'if when in a browser environment and no print event support is available a console warning is issued',
+  (t) => {
+    const currentGlobalValues = {...GLOBAL_VALUES};
+
+    GLOBAL_VALUES.hasPrintEventSupport = false;
+
+    const stub = sinon.stub(console, 'warn');
+
+    new PrintScout();
+
+    t.true(stub.calledOnce);
+
+    stub.restore();
+
+    GLOBAL_VALUES.hasPrintEventSupport = currentGlobalValues.hasPrintEventSupport;
+  }
+);
 
 test.serial('if the PrintScout instance has the correct shape', (t) => {
   t.deepEqual(
@@ -20,12 +48,6 @@ test.serial('if the PrintScout instance has the correct shape', (t) => {
     }
   );
 });
-
-const afterListener = sinon.spy();
-const afterPrintListener = sinon.spy();
-
-const beforeListener = sinon.spy();
-const beforePrintListener = sinon.spy();
 
 test.serial('if on adds the correct listener', (t) => {
   scout.on('after', afterListener);
@@ -131,7 +153,7 @@ test.serial('if triggering the events will fire the listeners', (t) => {
   scout.after(afterListener);
   scout.before(beforeListener);
 
-  const beforePrintEvent = utils.createNewEvent(BEFORE_PRINT);
+  const beforePrintEvent = GLOBAL_VALUES.createNewEvent(BEFORE_PRINT);
 
   window.dispatchEvent(beforePrintEvent);
 
@@ -140,7 +162,7 @@ test.serial('if triggering the events will fire the listeners', (t) => {
 
   t.true(afterListener.notCalled);
 
-  const afterPrintEvent = utils.createNewEvent(AFTER_PRINT);
+  const afterPrintEvent = GLOBAL_VALUES.createNewEvent(AFTER_PRINT);
 
   window.dispatchEvent(afterPrintEvent);
 

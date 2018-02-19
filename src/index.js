@@ -1,42 +1,8 @@
 // constants
-import {
-  AFTER_PRINT,
-  BEFORE_PRINT,
-  HAS_MATCH_MEDIA_SUPPORT,
-  HAS_ON_AFTER_PRINT_SUPPORT,
-  HAS_ON_BEFORE_PRINT_SUPPORT,
-  PRINT_MEDIA_QUERY_LIST,
-  SUPPORTS_PRINT_EVENT_HANDLERS
-} from './constants';
+import {AFTER_PRINT, BEFORE_PRINT, GLOBAL_VALUES} from './constants';
 
 // utils
-import {addListener, createNewEvent, getNormalizedEventName, removeListener} from './utils';
-
-/**
- * @description
- * if there is no support for the afterprint event, whenever the media query for
- * print changes, manually dispatch it
- */
-if (!HAS_ON_AFTER_PRINT_SUPPORT && HAS_MATCH_MEDIA_SUPPORT) {
-  PRINT_MEDIA_QUERY_LIST.addListener((mqlEvent) => {
-    if (!mqlEvent.matches) {
-      window.dispatchEvent(createNewEvent(AFTER_PRINT));
-    }
-  });
-}
-
-/**
- * @description
- * if there is no support for the beforeprint event, whenever the media query for
- * print changes, manually dispatch it
- */
-if (!HAS_ON_BEFORE_PRINT_SUPPORT && HAS_MATCH_MEDIA_SUPPORT) {
-  PRINT_MEDIA_QUERY_LIST.addListener((mqlEvent) => {
-    if (mqlEvent.matches) {
-      window.dispatchEvent(createNewEvent(BEFORE_PRINT));
-    }
-  });
-}
+import {addListener, getNormalizedEventName, isBrowser, onInitialLoad, removeListener} from './utils';
 
 /**
  * @class PrintScout
@@ -44,8 +10,14 @@ if (!HAS_ON_BEFORE_PRINT_SUPPORT && HAS_MATCH_MEDIA_SUPPORT) {
  */
 class PrintScout {
   constructor() {
-    if (!SUPPORTS_PRINT_EVENT_HANDLERS) {
-      console.log('Sorry, looks like this browser does not support print event handlers.'); // eslint-disable-line no-console
+    if (!GLOBAL_VALUES.isInitialized) {
+      onInitialLoad(this);
+    }
+
+    if (isBrowser() && !GLOBAL_VALUES.hasPrintEventSupport) {
+      /* eslint-disable no-console */
+      console.warn('Sorry, it looks like this browser does not support print event handlers.');
+      /* eslint-enable */
     }
   }
 
