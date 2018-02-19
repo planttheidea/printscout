@@ -3,12 +3,26 @@
   "ava": {
     "babel": "inherit",
     "failFast": true,
-    "files": ["test/*.js"],
-    "require": ["babel-register", "test/helpers/setup-browser-env.js"],
-    "source": ["src/*.js"],
+    "files": [
+      "test/*.js"
+    ],
+    "require": [
+      "babel-register",
+      "test/helpers/setup-browser-env.js"
+    ],
+    "source": [
+      "src/*.js"
+    ],
     "verbose": true
   },
-  "browserslist": ["defaults", "Explorer >= 9", "Safari >= 6", "Opera >= 15", "iOS >= 8", "Android >= 4"],
+  "browserslist": [
+    "defaults",
+    "Explorer >= 9",
+    "Safari >= 6",
+    "Opera >= 15",
+    "iOS >= 8",
+    "Android >= 4"
+  ],
   "bugs": {
     "url": "https://github.com/planttheidea/printscout/issues"
   },
@@ -40,7 +54,13 @@
   },
   "description": "Simple, cross-browser print event listeners (before and after) with no dependencies",
   "homepage": "https://github.com/planttheidea/printscout#readme",
-  "keywords": ["print", "beforeprint", "afterprint", "matchMedia", "event listeners"],
+  "keywords": [
+    "print",
+    "beforeprint",
+    "afterprint",
+    "matchMedia",
+    "event listeners"
+  ],
   "license": "MIT",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -61,8 +81,7 @@
     "lint": "NODE_ENV=test eslint src",
     "lint:fix": "NODE_ENV=test eslint src --fix",
     "prepublish": "if in-publish; then npm run prepublish:compile; fi",
-    "prepublish:compile":
-      "npm run lint && npm run test:coverage && npm run transpile:lib && npm run transpile:es && npm run dist",
+    "prepublish:compile": "npm run lint && npm run test:coverage && npm run transpile:lib && npm run transpile:es && npm run dist",
     "start": "npm run dev",
     "test": "NODE_PATH=. NODE_ENV=production BABEL_ENV=test ava",
     "test:coverage": "nyc npm test",
@@ -70,5 +89,5 @@
     "transpile:lib": "npm run clean:lib && BABEL_ENV=lib babel src --out-dir lib",
     "transpile:es": "npm run clean:es && BABEL_ENV=es babel src --out-dir es"
   },
-  "version": "2.0.1"
+  "version": "2.0.2"
 }
