@@ -50,6 +50,7 @@
     "rimraf": "^2.6.2",
     "sinon": "^7.2.2",
     "webpack": "^4.28.3",
+    "webpack-cli": "^3.2.0",
     "webpack-dev-server": "^3.1.14"
   },
   "description": "Simple, cross-browser print event listeners (before and after) with no dependencies",
