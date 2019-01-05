@@ -29,5 +29,5 @@ export const GLOBAL_VALUES = {
   hasOnBeforePrintSupport: false,
   hasPrintEventSupport: false,
   isInitialized: false,
-  mql: null
+  mql: null,
 };
