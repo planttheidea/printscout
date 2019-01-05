@@ -1,8 +1,20 @@
 // constants
-import {AFTER_PRINT, BEFORE_PRINT, GLOBAL_VALUES} from './constants';
+import {
+  AFTER_PRINT,
+  BEFORE_PRINT,
+  GLOBAL_VALUES,
+} from './constants';
 
 // utils
-import {addListener, getNormalizedEventName, isBrowser, onInitialLoad, removeListener} from './utils';
+import {
+  addListener,
+  getNormalizedEventName,
+  isBrowser,
+  onInitialLoad,
+  removeListener,
+} from './utils';
+
+const {keys} = Object;
 
 /**
  * @class PrintScout
@@ -27,7 +39,7 @@ class PrintScout {
    */
   handlers = {
     afterprint: [],
-    beforeprint: []
+    beforeprint: [],
   };
 
   /**
@@ -92,16 +104,12 @@ class PrintScout {
     if (eventName) {
       const event = getNormalizedEventName(eventName);
 
-      return this.handlers[event].forEach((handler) => {
-        removeListener(this.handlers, event, handler);
-      });
+      return this.handlers[event].forEach((handler) => removeListener(this.handlers, event, handler));
     }
 
-    return Object.keys(this.handlers).forEach((type) => {
-      this.handlers[type].forEach((handler) => {
-        removeListener(this.handlers, type, handler);
-      });
-    });
+    return keys(this.handlers).forEach((type) =>
+      this.handlers[type].forEach((handler) => removeListener(this.handlers, type, handler))
+    );
   }
 }
 

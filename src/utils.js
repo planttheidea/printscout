@@ -1,5 +1,11 @@
 // constants
-import {AFTER, AFTER_PRINT, BEFORE, BEFORE_PRINT, GLOBAL_VALUES} from './constants';
+import {
+  AFTER,
+  AFTER_PRINT,
+  BEFORE,
+  BEFORE_PRINT,
+  GLOBAL_VALUES,
+} from './constants';
 
 /**
  * @function getNormalizedEventName
@@ -41,7 +47,7 @@ export const removeListener = (handlers, eventName, handler) => {
   if (~indexOfHandler) {
     window.removeEventListener(event, handler);
 
-    handlers[event] = [...handlers[event].slice(0, indexOfHandler), ...handlers[event].slice(indexOfHandler + 1)];
+    handlers[event] = handlers[event].slice(0, indexOfHandler).concat(handlers[event].slice(indexOfHandler + 1));
   }
 };
 
@@ -62,7 +68,7 @@ export const addListener = (handlers, eventName, handler) => {
   window.addEventListener(event, handler);
 
   handler.off = function off() {
-    removeListener.call(this, handlers, event, handler);
+    return removeListener.call(this, handlers, event, handler);
   };
 
   handlers[event] = [...handlers[event], handler];
@@ -96,9 +102,7 @@ export const createNewEventLegacy = (eventName) => {
  * @param {string} eventName the name of the event to fire
  * @returns {Event} the event to fire
  */
-export const createNewEventModern = (eventName) => {
-  return new Event(eventName);
-};
+export const createNewEventModern = (eventName) => new Event(eventName);
 
 /**
  * @function isBrowser
@@ -108,9 +112,7 @@ export const createNewEventModern = (eventName) => {
  *
  * @returns  {boolean} are we in a browser
  */
-export const isBrowser = () => {
-  return typeof window !== 'undefined';
-};
+export const isBrowser = () => typeof window !== 'undefined';
 
 /**
  * @function onInitialLoad
@@ -130,8 +132,8 @@ export const onInitialLoad = () => {
   GLOBAL_VALUES.hasOnBeforePrintSupport = `on${BEFORE_PRINT}` in window;
 
   GLOBAL_VALUES.hasPrintEventSupport =
-    GLOBAL_VALUES.hasMatchMediaSupport ||
-    (GLOBAL_VALUES.hasOnAfterPrintSupport && GLOBAL_VALUES.hasOnBeforePrintSupport);
+    GLOBAL_VALUES.hasMatchMediaSupport
+    || (GLOBAL_VALUES.hasOnAfterPrintSupport && GLOBAL_VALUES.hasOnBeforePrintSupport);
 
   try {
     new Event(AFTER_PRINT);
